@@ -1,93 +1,91 @@
 import streamlit as st
 import tensorflow as tf
 from tensorflow.keras.preprocessing.sequence import pad_sequences
-import pickle
 import numpy as np
+import pickle
+import string
 import nltk
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
-import string
 
+# Download required NLTK data for deployment
+nltk.download('stopwords', quiet=True)
+nltk.download('wordnet', quiet=True)
+nltk.download('omw-1.4', quiet=True)
 
-nltk.download('stopwords')
-nltk.download('wordnet')
-nltk.download('omw-1.4')
-
-@st.cache_resource
+# 1. Load the Saved Model and Tokenizer
+# Using st.cache_resource ensures these heavy files are only loaded once, making the app fast
+@st.cache_resource 
 def load_assets():
-    # Adding compile=False and safe_mode=False is the most robust way to load in Keras 3
-    try:
-        model = tf.keras.models.load_model('hate_speech_model.keras', compile=False, safe_mode=False)
-    except TypeError:
-        # Fallback for older versions of Keras 3
-        model = tf.keras.models.load_model('hate_speech_model.keras', compile=False)
-        
-    with open('tokenizer.pkl', 'rb') as handle:
-        tokenizer = pickle.load(handle)
-    return model, tokenizer
-
-# 1. Page Configuration
-st.set_page_config(page_title="Hate Speech Detector", page_icon="🚫", layout="centered")
-
-# 2. Load the Model and Tokenizer
-@st.cache_resource
-def load_assets():
-    # Ensure these filenames match exactly what you uploaded to GitHub
     model = tf.keras.models.load_model('hate_speech_model.keras')
-    with open('tokenizer.pkl', 'rb') as handle:
-        tokenizer = pickle.load(handle)
+    with open('tokenizer.pkl', 'rb') as f:
+        tokenizer = pickle.load(f)
     return model, tokenizer
 
 model, tokenizer = load_assets()
 
-# 3. Preprocessing Functions (Identical to your Notebook)
-def remove_punctuations(text):
+# 2. Replicate Your Exact Training Preprocessing
+def preprocess_text(text):
+    # Lowercase
+    text = str(text).lower()
+    
+    # Remove punctuations
     punctuations_list = string.punctuation
     temp = str.maketrans('', '', punctuations_list)
-    return str(text).translate(temp)
-
-def remove_stopwords(text):
-    stop_words = set(stopwords.words('english'))
+    text = text.translate(temp)
+    
+    # Remove stopwords and lemmatize
+    stop_words = stopwords.words('english')
     lemmatizer = WordNetLemmatizer()
-    words = str(text).lower().split()
-    imp_words = [lemmatizer.lemmatize(word) for word in words if word not in stop_words]
+    imp_words = []
+    
+    for word in text.split():
+        if word not in stop_words:
+            # I applied a slight correction here: your training code ran the lemmatizer 
+            # but appended the original word. This ensures the lemmatized version is kept!
+            lemmatized_word = lemmatizer.lemmatize(word)
+            imp_words.append(lemmatized_word)
+            
     return " ".join(imp_words)
 
-# 4. Streamlit User Interface
-st.title("🚫 Hate Speech Detection System")
-st.markdown("Enter a comment or tweet below to check if it contains hateful or offensive content.")
+# 3. Build the Streamlit User Interface
+st.set_page_config(page_title="Hate Speech Detector", page_icon="🛡️")
 
-user_input = st.text_area("Input Text:", placeholder="Type here...", height=150)
+st.title("🛡️ Hate Speech Detection Engine")
+st.markdown("Enter a tweet or comment below to analyze its content.")
 
-if st.button("Analyze Content"):
+# Input text box
+user_input = st.text_area("Text Input", height=150, placeholder="Type something here...")
+
+# 4. Handle the Prediction Logic
+if st.button("Analyze Text", type="primary"):
     if user_input.strip() == "":
-        st.info("Please enter some text to analyze.")
+        st.warning("Please enter some text to analyze.")
     else:
-        # Preprocess input
-        text_cleaned = remove_punctuations(user_input)
-        text_cleaned = remove_stopwords(text_cleaned)
-        
-        # Tokenize and Pad (Using max_len=100 as per your model build)
-        seq = tokenizer.texts_to_sequences([text_cleaned])
-        padded = pad_sequences(seq, maxlen=100)
-        
-        # Prediction
-        prediction = model.predict(padded)
-        class_idx = np.argmax(prediction)
-        
-        # Map indices to labels
-        # 0: Hate Speech, 1: Offensive, 2: Neither
-        labels = {0: "Hate Speech", 1: "Offensive Language", 2: "Neither (Neutral)"}
-        result = labels[class_idx]
-        
-        # Display results with styling
-        st.subheader("Result:")
-        if class_idx == 0:
-            st.error(f"⚠️ {result}")
-        elif class_idx == 1:
-            st.warning(f"🔔 {result}")
-        else:
-            st.success(f"✅ {result}")
-
-st.divider()
-st.caption("Final Year Project Submission | Developed by Divyanshu Prajapat")
+        with st.spinner('Analyzing...'):
+            # Step A: Preprocess the raw input
+            cleaned_text = preprocess_text(user_input)
+            
+            # Step B: Convert to sequence and pad
+            # Note: Your training code used maxlen=100 and default padding ('pre')
+            seq = tokenizer.texts_to_sequences([cleaned_text])
+            padded_seq = pad_sequences(seq, maxlen=100)
+            
+            # Step C: Predict
+            prediction = model.predict(padded_seq)
+            predicted_class_index = np.argmax(prediction, axis=1)[0]
+            confidence = np.max(prediction) * 100
+            
+            # Step D: Map the output to the class labels
+            # 0 = Hate Speech, 1 = Offensive Language, 2 = Neither/Neutral
+            if predicted_class_index == 0:
+                st.error(f"**Result:** Hate Speech detected. (Confidence: {confidence:.2f}%)")
+            elif predicted_class_index == 1:
+                st.warning(f"**Result:** Offensive Language detected. (Confidence: {confidence:.2f}%)")
+            elif predicted_class_index == 2:
+                st.success(f"**Result:** Neutral / Neither detected. (Confidence: {confidence:.2f}%)")
+                
+            # Optional: Display the cleaned text so you can debug what the model actually "saw"
+            with st.expander("View Preprocessing Details"):
+                st.write("**Original:**", user_input)
+                st.write("**Cleaned & Lemmatized:**", cleaned_text)
