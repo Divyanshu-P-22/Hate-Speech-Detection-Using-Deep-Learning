@@ -3,6 +3,7 @@ import tensorflow as tf
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 import numpy as np
 import pickle
+import random
 import string
 import nltk
 from nltk.corpus import stopwords
@@ -51,11 +52,23 @@ st.markdown("Enter a comment or tweet below to check if it contains hateful or o
 
 user_input = st.text_area("Input Text:", placeholder="Type here...", height=150)
 
+loading_phrases = [
+    "Consulting the neural overlords...",
+    "Translating internet troll into English...",
+    "Scanning for emotional damage...",
+    "Surfing the darkest corners of the web...",
+    "Math is happening. Please hold...",
+    "Asking the GPU nicely to do its job...",
+    "Sanitizing inputs with digital soap...",
+    "Judging your text silently...",
+    "Checking for internet toxicity..."
+]
+
 if st.button("Analyze Content"):
     if user_input.strip() == "":
         st.info("Please enter some text to analyze.")
     else:
-        with st.spinner('Surfing through Social Media...','Analyzing...'):
+        with st.spinner(random.choice(loading_phrases)):
             # Preprocess input
             text_cleaned = remove_punctuations(user_input)
             text_cleaned = remove_stopwords(text_cleaned)
@@ -72,7 +85,7 @@ if st.button("Analyze Content"):
             # 0: Hate Speech, 1: Offensive, 2: Neither
             labels = {0: "Hate Speech", 1: "Offensive Language", 2: "Neither (Neutral)"}
             result = labels[class_idx]
-            
+
             # Display results with styling
             st.subheader("Result:")
             if class_idx == 0:
@@ -81,6 +94,13 @@ if st.button("Analyze Content"):
                 st.warning(f"🔔 {result}")
             else:
                 st.success(f"✅ {result}")
+                st.balloons() # Drops balloons down the screen
+                st.caption("Wow, a nice comment on the internet! That's rare.")
+                
+with st.expander("📝 Developer Disclaimer"):
+    st.write("""
+    *This model was trained on thousands of highly toxic tweets. As the Project Developer, I take zero responsibility for the emotional damage caused by whatever text you just decided to test it with.* *If the model is wrong, please blame the internet, not the developer.*
+    """)
 
 st.divider()
 st.caption("Deep Learning Project Submission | Developed by Divyanshu Prajapat")
