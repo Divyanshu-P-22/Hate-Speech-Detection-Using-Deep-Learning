@@ -16,7 +16,7 @@ nltk.download('omw-1.4')
 @st.cache_resource
 def load_assets():
     # Force the legacy loading if possible
-    model = tf.keras.models.load_model('hate_speech_model.h5', compile=False)
+    model = tf.keras.models.load_model('hate_speech_model.keras', compile=False)
     with open('tokenizer.pkl', 'rb') as handle:
         tokenizer = pickle.load(handle)
     return model, tokenizer
