@@ -1,5 +1,3 @@
----
-
 # 🚫 Hate Speech Detection using Deep Learning
 
 This repository contains a Deep Learning project designed to classify text into three categories: **Hate Speech**, **Offensive Language**, or **Neutral**. The project features a trained **Bidirectional LSTM** model and is deployed as a live web application using **Streamlit**.
