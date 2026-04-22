@@ -52,22 +52,21 @@ st.markdown("Enter a comment or tweet below to check if it contains hateful or o
 
 user_input = st.text_area("Input Text:", placeholder="Type here...", height=150)
 
-loading_phrases = [
-    "Consulting the neural overlords...",
-    "Translating internet troll into English...",
-    "Scanning for emotional damage...",
-    "Surfing the darkest corners of the web...",
-    "Math is happening. Please hold...",
-    "Asking the GPU nicely to do its job...",
-    "Sanitizing inputs with digital soap...",
-    "Judging your text silently...",
-    "Checking for internet toxicity..."
-]
-
 if st.button("Analyze Content"):
     if user_input.strip() == "":
         st.info("Please enter some text to analyze.")
     else:
+        loading_phrases = [
+            "Consulting the neural overlords...",
+            "Translating internet troll into English...",
+            "Scanning for emotional damage...",
+            "Surfing the darkest corners of the web...",
+            "Math is happening. Please hold...",
+            "Asking the GPU nicely to do its job...",
+            "Sanitizing inputs with digital soap...",
+            "Judging your text silently...",
+            "Checking for internet toxicity..."
+        ]
         with st.spinner(random.choice(loading_phrases)):
             # Preprocess input
             text_cleaned = remove_punctuations(user_input)
