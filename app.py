@@ -28,7 +28,7 @@ st.set_page_config(page_title="Hate Speech Detector", page_icon="🚫", layout="
 @st.cache_resource
 def load_assets():
     # Ensure these filenames match exactly what you uploaded to GitHub
-    model = tf.keras.models.load_model('hate_speech_model.h5')
+    model = tf.keras.models.load_model('hate_speech_model.keras')
     with open('tokenizer.pkl', 'rb') as handle:
         tokenizer = pickle.load(handle)
     return model, tokenizer
