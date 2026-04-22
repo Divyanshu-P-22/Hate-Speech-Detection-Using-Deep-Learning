@@ -4,7 +4,7 @@ This repository contains a Deep Learning project designed to classify text into 
 
 ## 🌐 Live Demo
 You can access the deployed web application here: 
-`[INSERT YOUR STREAMLIT URL HERE]`
+`https://hate-speech-detection-using-deep-learning.streamlit.app/`
 
 ## 📊 Project Overview
 The goal of this project is to automate the detection of harmful content in social media comments or tweets. By leveraging Natural Language Processing (NLP) and Long Short-Term Memory (LSTM) networks, the model understands the context of sentences to provide accurate classifications.
@@ -43,8 +43,8 @@ The model is built using TensorFlow/Keras with the following layers:
 ## 🚀 How to Run Locally
 1.  **Clone the repository:**
     ```bash
-    git clone https://github.com/[Your-Username]/[Your-Repo-Name].git
-    cd [Your-Repo-Name]
+    git clone https://github.com/Divyanshu-P-22/Hate-Speech-Detection-Using-Deep-Learning.git
+    cd Hate-Speech-Detection-Using-Deep-Learning
     ```
 2.  **Install dependencies:**
     ```bash
