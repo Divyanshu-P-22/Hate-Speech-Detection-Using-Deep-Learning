@@ -4,6 +4,7 @@ from tensorflow.keras.preprocessing.sequence import pad_sequences
 import numpy as np
 import pickle
 import random
+import time
 import string
 import nltk
 from nltk.corpus import stopwords
@@ -52,7 +53,7 @@ st.markdown("Enter a comment or tweet below to check if it contains hateful or o
 
 user_input = st.text_area("Input Text:", placeholder="Type here...", height=150)
 
-if st.button("Analyze Content"):
+if st.button("Run Analysis"):
     if user_input.strip() == "":
         st.info("Please enter some text to analyze.")
     else:
@@ -68,6 +69,7 @@ if st.button("Analyze Content"):
             "Checking for internet toxicity..."
         ]
         with st.spinner(random.choice(loading_phrases)):
+            time.sleep(2)
             # Preprocess input
             text_cleaned = remove_punctuations(user_input)
             text_cleaned = remove_stopwords(text_cleaned)
