@@ -8,7 +8,7 @@ import nltk
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 
-# 1. Page Configuration (From your snippet - must be the first Streamlit command)
+# 1. Page Configuration
 st.set_page_config(page_title="Hate Speech Detector", page_icon="🚫", layout="centered")
 
 # Download required NLTK data for deployment
@@ -26,7 +26,7 @@ def load_assets():
 
 model, tokenizer = load_assets()
 
-# 3. Preprocessing Functions (Separated to match your UI logic)
+# 3. Preprocessing Functions
 punctuations_list = string.punctuation
 
 def remove_punctuations(text):
@@ -45,7 +45,7 @@ def remove_stopwords(text):
             
     return " ".join(imp_words)
 
-# 4. Streamlit User Interface (Your exact snippet)
+# 4. Streamlit User Interface
 st.title("🚫 Hate Speech Detection System")
 st.markdown("Enter a comment or tweet below to check if it contains hateful or offensive content.")
 
@@ -55,12 +55,12 @@ if st.button("Analyze Content"):
     if user_input.strip() == "":
         st.info("Please enter some text to analyze.")
     else:
-        with st.spinner('Analyzing...'): # Added a quick loading spinner for better UX
+        with st.spinner('Surfing through Social Media...','Analyzing...'):
             # Preprocess input
             text_cleaned = remove_punctuations(user_input)
             text_cleaned = remove_stopwords(text_cleaned)
             
-            # Tokenize and Pad (Using max_len=100 as per your model build)
+            # Tokenize and Pad
             seq = tokenizer.texts_to_sequences([text_cleaned])
             padded = pad_sequences(seq, maxlen=100)
             
@@ -83,4 +83,4 @@ if st.button("Analyze Content"):
                 st.success(f"✅ {result}")
 
 st.divider()
-st.caption("Final Year Project Submission | Developed by Divyanshu Prajapat")
+st.caption("Deep Learning Project Submission | Developed by Divyanshu Prajapat")
