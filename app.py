@@ -53,50 +53,65 @@ st.markdown("Enter a comment or tweet below to check if it contains hateful or o
 
 user_input = st.text_area("Input Text:", placeholder="Type here...", height=150)
 
+loading_phrases = [
+    "Consulting the neural overlords...",
+    "Translating internet troll into English...",
+    "Scanning for emotional damage...",
+    "Surfing the darkest corners of the web...",
+    "Math is happening. Please hold...",
+    "Asking the GPU nicely to do its job...",
+    "Sanitizing inputs with digital soap...",
+    "Judging your text silently...",
+    "Checking for internet toxicity..."
+]
+custom_hate_phrases = ["go to hell", "i hate you", "die", "jump off a cliff", "Mother Fucker", "fuck you"]
+custom_offensive_slang = ["stfu", "gtfo", "idiot", "dumbass", "shut up"]
+
 if st.button("Run Analysis"):
     if user_input.strip() == "":
         st.info("Please enter some text to analyze.")
     else:
-        loading_phrases = [
-            "Consulting the neural overlords...",
-            "Translating internet troll into English...",
-            "Scanning for emotional damage...",
-            "Surfing the darkest corners of the web...",
-            "Math is happening. Please hold...",
-            "Asking the GPU nicely to do its job...",
-            "Sanitizing inputs with digital soap...",
-            "Judging your text silently...",
-            "Checking for internet toxicity..."
-        ]
         with st.spinner(random.choice(loading_phrases)):
             time.sleep(2)
             # Preprocess input
-            text_cleaned = remove_punctuations(user_input)
-            text_cleaned = remove_stopwords(text_cleaned)
+            user_text_lower = user_input.lower()
             
-            # Tokenize and Pad
-            seq = tokenizer.texts_to_sequences([text_cleaned])
-            padded = pad_sequences(seq, maxlen=100)
+            # First: Check the custom dictionary
+            is_custom_hate = any(phrase in user_text_lower for phrase in custom_hate_phrases)
+            is_custom_offensive = any(phrase in user_text_lower for phrase in custom_offensive_slang)
             
-            # Prediction
-            prediction = model.predict(padded)
-            class_idx = np.argmax(prediction)
-            
-            # Map indices to labels
-            # 0: Hate Speech, 1: Offensive, 2: Neither
-            labels = {0: "Hate Speech", 1: "Offensive Language", 2: "Neither (Neutral)"}
-            result = labels[class_idx]
-
-            # Display results with styling
             st.subheader("Result:")
-            if class_idx == 0:
-                st.error(f"⚠️ {result}")
-            elif class_idx == 1:
-                st.warning(f"🔔 {result}")
+            
+            if is_custom_hate:
+                st.error("⚠️ Hate Speech Detected!")
+            elif is_custom_offensive:
+                st.warning("🔔 Offensive Language detected.")
             else:
-                st.success(f"✅ {result}")
-                st.balloons() # Drops balloons down the screen
-                st.caption("Wow, a nice comment on the internet! That's rare.")
+                text_cleaned = remove_punctuations(user_input)
+                text_cleaned = remove_stopwords(text_cleaned)
+            
+                # Tokenize and Pad
+                seq = tokenizer.texts_to_sequences([text_cleaned])
+                padded = pad_sequences(seq, maxlen=100)
+                
+                # Prediction
+                prediction = model.predict(padded)
+                class_idx = np.argmax(prediction)
+            
+                # Map indices to labels
+                # 0: Hate Speech, 1: Offensive, 2: Neither
+                labels = {0: "Hate Speech Detected!", 1: "Offensive Language Detected.", 2: "Neither (Neutral) Detection"}
+                result = labels[class_idx]
+
+                # Display results
+                if class_idx == 0:
+                    st.error(f"⚠️ {result}")
+                elif class_idx == 1:
+                    st.warning(f"🔔 {result}")
+                else:
+                    st.success(f"✅ {result}")
+                    st.balloons() # Drops balloons down the screen
+                    st.caption("Wow, a nice comment on the internet! That's rare.")
                 
 with st.expander("📝 Developer Disclaimer"):
     st.write("""
