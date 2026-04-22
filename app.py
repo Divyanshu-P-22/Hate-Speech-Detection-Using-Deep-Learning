@@ -8,13 +8,15 @@ import nltk
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 
+# 1. Page Configuration (From your snippet - must be the first Streamlit command)
+st.set_page_config(page_title="Hate Speech Detector", page_icon="🚫", layout="centered")
+
 # Download required NLTK data for deployment
 nltk.download('stopwords', quiet=True)
 nltk.download('wordnet', quiet=True)
 nltk.download('omw-1.4', quiet=True)
 
-# 1. Load the Saved Model and Tokenizer
-# Using st.cache_resource ensures these heavy files are only loaded once, making the app fast
+# 2. Load the Saved Model and Tokenizer
 @st.cache_resource 
 def load_assets():
     model = tf.keras.models.load_model('hate_speech_model.keras')
@@ -24,68 +26,61 @@ def load_assets():
 
 model, tokenizer = load_assets()
 
-# 2. Replicate Your Exact Training Preprocessing
-def preprocess_text(text):
-    # Lowercase
-    text = str(text).lower()
-    
-    # Remove punctuations
-    punctuations_list = string.punctuation
+# 3. Preprocessing Functions (Separated to match your UI logic)
+punctuations_list = string.punctuation
+
+def remove_punctuations(text):
+    text = str(text).lower() # Lowercase first
     temp = str.maketrans('', '', punctuations_list)
-    text = text.translate(temp)
-    
-    # Remove stopwords and lemmatize
+    return text.translate(temp)
+
+def remove_stopwords(text):
     stop_words = stopwords.words('english')
     lemmatizer = WordNetLemmatizer()
     imp_words = []
     
-    for word in text.split():
+    for word in str(text).split():
         if word not in stop_words:
-            # I applied a slight correction here: your training code ran the lemmatizer 
-            # but appended the original word. This ensures the lemmatized version is kept!
-            lemmatized_word = lemmatizer.lemmatize(word)
-            imp_words.append(lemmatized_word)
+            imp_words.append(lemmatizer.lemmatize(word))
             
     return " ".join(imp_words)
 
-# 3. Build the Streamlit User Interface
-st.set_page_config(page_title="Hate Speech Detector", page_icon="🛡️")
+# 4. Streamlit User Interface (Your exact snippet)
+st.title("🚫 Hate Speech Detection System")
+st.markdown("Enter a comment or tweet below to check if it contains hateful or offensive content.")
 
-st.title("🛡️ Hate Speech Detection Engine")
-st.markdown("Enter a tweet or comment below to analyze its content.")
+user_input = st.text_area("Input Text:", placeholder="Type here...", height=150)
 
-# Input text box
-user_input = st.text_area("Text Input", height=150, placeholder="Type something here...")
-
-# 4. Handle the Prediction Logic
-if st.button("Analyze Text", type="primary"):
+if st.button("Analyze Content"):
     if user_input.strip() == "":
-        st.warning("Please enter some text to analyze.")
+        st.info("Please enter some text to analyze.")
     else:
-        with st.spinner('Analyzing...'):
-            # Step A: Preprocess the raw input
-            cleaned_text = preprocess_text(user_input)
+        with st.spinner('Analyzing...'): # Added a quick loading spinner for better UX
+            # Preprocess input
+            text_cleaned = remove_punctuations(user_input)
+            text_cleaned = remove_stopwords(text_cleaned)
             
-            # Step B: Convert to sequence and pad
-            # Note: Your training code used maxlen=100 and default padding ('pre')
-            seq = tokenizer.texts_to_sequences([cleaned_text])
-            padded_seq = pad_sequences(seq, maxlen=100)
+            # Tokenize and Pad (Using max_len=100 as per your model build)
+            seq = tokenizer.texts_to_sequences([text_cleaned])
+            padded = pad_sequences(seq, maxlen=100)
             
-            # Step C: Predict
-            prediction = model.predict(padded_seq)
-            predicted_class_index = np.argmax(prediction, axis=1)[0]
-            confidence = np.max(prediction) * 100
+            # Prediction
+            prediction = model.predict(padded)
+            class_idx = np.argmax(prediction)
             
-            # Step D: Map the output to the class labels
-            # 0 = Hate Speech, 1 = Offensive Language, 2 = Neither/Neutral
-            if predicted_class_index == 0:
-                st.error(f"**Result:** Hate Speech detected. (Confidence: {confidence:.2f}%)")
-            elif predicted_class_index == 1:
-                st.warning(f"**Result:** Offensive Language detected. (Confidence: {confidence:.2f}%)")
-            elif predicted_class_index == 2:
-                st.success(f"**Result:** Neutral / Neither detected. (Confidence: {confidence:.2f}%)")
-                
-            # Optional: Display the cleaned text so you can debug what the model actually "saw"
-            with st.expander("View Preprocessing Details"):
-                st.write("**Original:**", user_input)
-                st.write("**Cleaned & Lemmatized:**", cleaned_text)
+            # Map indices to labels
+            # 0: Hate Speech, 1: Offensive, 2: Neither
+            labels = {0: "Hate Speech", 1: "Offensive Language", 2: "Neither (Neutral)"}
+            result = labels[class_idx]
+            
+            # Display results with styling
+            st.subheader("Result:")
+            if class_idx == 0:
+                st.error(f"⚠️ {result}")
+            elif class_idx == 1:
+                st.warning(f"🔔 {result}")
+            else:
+                st.success(f"✅ {result}")
+
+st.divider()
+st.caption("Final Year Project Submission | Developed by Divyanshu Prajapat")
