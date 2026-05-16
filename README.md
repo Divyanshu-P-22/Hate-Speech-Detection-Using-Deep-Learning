@@ -35,7 +35,7 @@ The model is built using TensorFlow/Keras with the following layers:
 ```text
 ├── app.py                # Streamlit web application script
 ├── requirements.txt      # List of dependencies for deployment
-├── hate_speech_model.h5  # Trained LSTM model
+├── hate_speech_model.keras  # Trained LSTM model
 ├── tokenizer.pkl         # Saved tokenizer for text-to-sequence conversion
 └── README.md             # Project documentation
 ```
