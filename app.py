@@ -112,6 +112,11 @@ if st.button("Run Analysis"):
                     st.success(f"✅ {result}")
                     st.balloons() # Drops balloons down the screen
                     st.caption("Wow, a nice comment on the internet! That's rare.")
+
+            st.write("") # Spacer
+            with st.expander("🔍 View Preprocessing Details"):
+                st.write(f"**Original:** {user_input}")
+                st.write(f"**Cleaned & Lemmatized:** {text_cleaned}")
                 
 with st.expander("📝 Developer Disclaimer"):
     st.write("""
