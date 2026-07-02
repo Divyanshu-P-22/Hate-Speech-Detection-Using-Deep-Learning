@@ -33,11 +33,11 @@ The model is built using TensorFlow/Keras with the following layers:
 
 ## 📁 Repository Structure
 ```text
-├── app.py                # Streamlit web application script
-├── requirements.txt      # List of dependencies for deployment
-├── hate_speech_model.keras  # Trained LSTM model
-├── tokenizer.pkl         # Saved tokenizer for text-to-sequence conversion
-└── README.md             # Project documentation
+├── app.py                    # Streamlit web application script
+├── requirements.txt          # List of dependencies for deployment
+├── hate_speech_model.keras   # Trained LSTM model
+├── tokenizer.pkl             # Saved tokenizer for text-to-sequence conversion
+└── README.md                 # Project documentation
 ```
 
 ## 🚀 How to Run Locally
